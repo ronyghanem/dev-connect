@@ -6,6 +6,7 @@ import User from "@/models/User";
 import Post from "@/models/Post";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/isAdmin";
 
 export async function createPost(formData: FormData) {
   const session = await auth();
@@ -60,6 +61,8 @@ export async function updatePost(
     throw new Error("Title and content are required.");
   }
 
+  const { isAdmin } = await requireAdmin();
+
   await connectDB();
 
   const user = await User.findOne({
@@ -76,7 +79,10 @@ export async function updatePost(
     throw new Error("Post not found.");
   }
 
-  if (post.author.toString() !== user._id.toString()) {
+  const isOwner =
+    post.author.toString() === user._id.toString();
+
+  if (!isAdmin && !isOwner) {
     throw new Error("You can only edit your own posts.");
   }
 
@@ -106,6 +112,8 @@ export async function deletePost(postId: string) {
     throw new Error("You must be logged in.");
   }
 
+  const { isAdmin } = await requireAdmin();
+
   await connectDB();
 
   const user = await User.findOne({
@@ -122,13 +130,17 @@ export async function deletePost(postId: string) {
     throw new Error("Post not found.");
   }
 
-  if (post.author.toString() !== user._id.toString()) {
+  const isOwner =
+    post.author.toString() === user._id.toString();
+
+  if (!isAdmin && !isOwner) {
     throw new Error("You can only delete your own posts.");
   }
 
   await Post.findByIdAndDelete(postId);
 
   revalidatePath("/posts");
+  revalidatePath(`/posts/${postId}`);
 
   redirect("/posts");
 }

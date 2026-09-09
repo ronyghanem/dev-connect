@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import Developer from "@/models/Developer";
 
 export const metadata: Metadata = {
   title: "Developers",
@@ -13,9 +14,12 @@ export const metadata: Metadata = {
 export default async function DevelopersPage() {
   await connectDB();
 
-  const users = await User.find()
-    .sort({ createdAt: -1 })
-    .lean();
+  const [users, developers] = await Promise.all([
+    User.find().sort({ createdAt: -1 }).lean(),
+    Developer.find().sort({ createdAt: -1 }).lean(),
+  ]);
+
+  const totalDevelopers = users.length + developers.length;
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
@@ -41,13 +45,14 @@ export default async function DevelopersPage() {
         <span className="h-2 w-2 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(163,230,53,0.9)]" />
 
         <span className="text-sm text-gray-300">
-          {users.length} {users.length === 1 ? "developer" : "developers"}{" "}
-          in the community
+          {totalDevelopers}{" "}
+          {totalDevelopers === 1 ? "developer" : "developers"} in the
+          community
         </span>
       </div>
 
       {/* Developers */}
-      {users.length === 0 ? (
+      {totalDevelopers === 0 ? (
         <div className="neon-card mt-10 p-10 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/5 text-2xl text-cyan-400">
             ✦
@@ -63,9 +68,10 @@ export default async function DevelopersPage() {
         </div>
       ) : (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Existing GitHub users */}
           {users.map((user, index) => (
             <Link
-              key={user._id.toString()}
+              key={`user-${user._id.toString()}`}
               href={`/developers/${user._id}`}
               className={`neon-card group reveal reveal-delay-${Math.min(
                 index + 1,
@@ -139,6 +145,56 @@ export default async function DevelopersPage() {
                 </span>
               </div>
             </Link>
+          ))}
+
+          {/* MongoDB CRUD developers */}
+          {developers.map((developer, index) => (
+            <div
+              key={`developer-${developer._id.toString()}`}
+              className={`neon-card group reveal reveal-delay-${Math.min(
+                ((users.length + index) % 4) + 1,
+                4
+              )} p-6`}
+            >
+              {/* Avatar */}
+              <div className="flex items-start justify-between">
+                <div className="relative">
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500 opacity-40 blur-md transition duration-300 group-hover:opacity-80" />
+
+                  <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-cyan-300/30 bg-gradient-to-br from-cyan-400/20 to-violet-500/20 text-xl font-bold text-cyan-300">
+                    {developer.image ? (
+                      <img
+                        src={developer.image}
+                        alt={developer.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      developer.name?.charAt(0).toUpperCase() || "D"
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Info */}
+              <h2 className="mt-6 text-xl font-semibold text-white transition duration-300 group-hover:text-cyan-300">
+                {developer.name}
+              </h2>
+
+              <p className="mt-1 text-sm text-cyan-400">
+                {developer.role}
+              </p>
+
+              <p className="mt-4 line-clamp-3 min-h-[72px] leading-6 text-gray-400">
+                {developer.bio || "No bio added yet."}
+              </p>
+
+              {/* Footer */}
+              <div className="mt-6 border-t border-white/5 pt-4">
+                <span className="text-sm font-medium text-gray-500">
+                  Community Developer
+                </span>
+              </div>
+            </div>
           ))}
         </div>
       )}

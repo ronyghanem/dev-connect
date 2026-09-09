@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Post from "@/models/Post";
 import { deletePost } from "@/lib/actions/posts";
+import { requireAdmin } from "@/lib/isAdmin";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -60,6 +61,7 @@ export default async function PostPage({ params }: Props) {
   }
 
   const session = await auth();
+  const { isAdmin } = await requireAdmin();
 
   let isOwner = false;
 
@@ -73,6 +75,8 @@ export default async function PostPage({ params }: Props) {
         post.author.toString() === currentUser._id.toString();
     }
   }
+
+  const canManage = isAdmin || isOwner;
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
@@ -140,19 +144,23 @@ export default async function PostPage({ params }: Props) {
             {post.content}
           </div>
 
-          {/* Owner controls */}
-          {isOwner && (
+          {/* Manage controls */}
+          {canManage && (
             <>
               <div className="my-8 h-px bg-white/5" />
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-300">
-                    Manage your post
+                    {isAdmin && !isOwner
+                      ? "Manage community post"
+                      : "Manage your post"}
                   </p>
 
                   <p className="mt-1 text-xs text-gray-600">
-                    You can edit or remove this post.
+                    {isAdmin && !isOwner
+                      ? "As an administrator, you can edit or remove this post."
+                      : "You can edit or remove this post."}
                   </p>
                 </div>
 

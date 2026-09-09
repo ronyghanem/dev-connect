@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Post from "@/models/Post";
+import { requireAdmin } from "@/lib/isAdmin";
 
 type RouteContext = {
   params: Promise<{
@@ -63,6 +64,8 @@ export async function PUT(
       );
     }
 
+    const { isAdmin } = await requireAdmin();
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -115,8 +118,12 @@ export async function PUT(
       );
     }
 
-    // Ownership check
-    if (post.author.toString() !== user._id.toString()) {
+    // Admin can edit any post.
+    // Regular developers can only edit their own posts.
+    const isOwner =
+      post.author.toString() === user._id.toString();
+
+    if (!isAdmin && !isOwner) {
       return NextResponse.json(
         { error: "You can only edit your own posts." },
         { status: 403 }
@@ -155,6 +162,8 @@ export async function DELETE(
       );
     }
 
+    const { isAdmin } = await requireAdmin();
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -186,8 +195,12 @@ export async function DELETE(
       );
     }
 
-    // Ownership check
-    if (post.author.toString() !== user._id.toString()) {
+    // Admin can delete any post.
+    // Regular developers can only delete their own posts.
+    const isOwner =
+      post.author.toString() === user._id.toString();
+
+    if (!isAdmin && !isOwner) {
       return NextResponse.json(
         { error: "You can only delete your own posts." },
         { status: 403 }

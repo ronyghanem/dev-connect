@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
-
+import Image from "next/image";
 type Props = {
   params: Promise<{ id: string }>;
 };
@@ -79,14 +79,26 @@ export default async function DeveloperPage({ params }: Props) {
         <div className="relative">
           {/* Profile header */}
           <div className="flex flex-col gap-7 sm:flex-row sm:items-center">
-            {/* Avatar */}
-            <div className="relative mx-auto sm:mx-0">
-              <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500 opacity-50 blur-lg" />
+           {/* Avatar */}
+<div className="relative mx-auto sm:mx-0">
+  <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500 opacity-50 blur-lg" />
 
-              <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-cyan-300/40 bg-gradient-to-br from-cyan-400/15 via-violet-500/15 to-fuchsia-500/15 text-4xl font-bold text-cyan-300 shadow-[0_0_35px_rgba(34,211,238,0.2)]">
-                {user.name?.charAt(0).toUpperCase() || "D"}
-              </div>
-            </div>
+  <div className="relative h-28 w-28 overflow-hidden rounded-full border border-cyan-300/40 bg-gradient-to-br from-cyan-400/15 via-violet-500/15 to-fuchsia-500/15 shadow-[0_0_35px_rgba(34,211,238,0.2)]">
+    {user.image ? (
+      <Image
+        src={user.image}
+        alt={`${user.name}'s profile picture`}
+        fill
+        className="object-cover"
+        sizes="112px"
+      />
+    ) : (
+      <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-cyan-300">
+        {user.name?.charAt(0).toUpperCase() || "D"}
+      </div>
+    )}
+  </div>
+</div>
 
             {/* Name */}
             <div className="flex-1 text-center sm:text-left">

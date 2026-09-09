@@ -4,28 +4,40 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-const links = [
-  {
-    href: "/",
-    label: "Home",
-  },
-  {
-    href: "/developers",
-    label: "Developers",
-  },
-  {
-    href: "/posts",
-    label: "Posts",
-  },
-  {
-    href: "/profile",
-    label: "My Profile",
-  },
-];
+type NavLinksProps = {
+  isAdmin: boolean;
+};
 
-export default function NavLinks() {
+export default function NavLinks({ isAdmin }: NavLinksProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const links = [
+    {
+      href: "/",
+      label: "Home",
+    },
+    {
+      href: "/developers",
+      label: "Developers",
+    },
+    ...(isAdmin
+      ? [
+          {
+            href: "/developers-crud",
+            label: "Manage Developers",
+          },
+        ]
+      : []),
+    {
+      href: "/posts",
+      label: "Posts",
+    },
+    {
+      href: "/profile",
+      label: "My Profile",
+    },
+  ];
 
   const isActive = (href: string) => {
     if (href === "/") {

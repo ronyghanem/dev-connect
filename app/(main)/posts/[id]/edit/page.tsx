@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Post from "@/models/Post";
+import User from "@/models/User";
+import { requireAdmin } from "@/lib/isAdmin";
 import { updatePost } from "@/lib/actions/posts";
 
 type Props = {
@@ -50,6 +52,8 @@ export default async function EditPostPage({ params }: Props) {
     redirect("/login");
   }
 
+  const { isAdmin } = await requireAdmin();
+
   await connectDB();
 
   let post;
@@ -64,6 +68,21 @@ export default async function EditPostPage({ params }: Props) {
     notFound();
   }
 
+  const user = await User.findOne({
+    email: session.user.email,
+  }).lean();
+
+  if (!user) {
+    redirect(`/posts/${id}`);
+  }
+
+  const isOwner =
+    post.author.toString() === user._id.toString();
+
+  if (!isAdmin && !isOwner) {
+    redirect(`/posts/${id}`);
+  }
+
   return (
     <section className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
       {/* Header */}
@@ -76,7 +95,7 @@ export default async function EditPostPage({ params }: Props) {
         </Link>
 
         <p className="mt-8 text-sm font-semibold uppercase tracking-[0.25em] text-violet-400">
-          Your post
+          {isAdmin && !isOwner ? "Admin editing" : "Your post"}
         </p>
 
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
@@ -85,8 +104,9 @@ export default async function EditPostPage({ params }: Props) {
         </h1>
 
         <p className="mt-4 max-w-2xl leading-7 text-gray-400">
-          Update your post and keep the community up to date with your latest
-          ideas.
+          {isAdmin && !isOwner
+            ? "As an administrator, you can update this community post."
+            : "Update your post and keep the community up to date with your latest ideas."}
         </p>
       </div>
 
@@ -154,7 +174,9 @@ export default async function EditPostPage({ params }: Props) {
 
               <div>
                 <p className="text-sm font-medium text-gray-300">
-                  Editing your post
+                  {isAdmin && !isOwner
+                    ? "Administrator editing"
+                    : "Editing your post"}
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-gray-500">

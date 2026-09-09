@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Post from "@/models/Post";
+import PostActions from "./PostActions";
 
 export const metadata: Metadata = {
   title: "Posts",
@@ -11,12 +13,22 @@ export const metadata: Metadata = {
 };
 
 export default async function PostsPage() {
+  const session = await auth();
+
+  const sessionEmail = session?.user?.email?.toLowerCase();
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+
+  const isAdmin =
+    !!sessionEmail &&
+    !!adminEmail &&
+    sessionEmail === adminEmail;
+
   await connectDB();
 
   const posts = await Post.find()
     .populate({
       path: "author",
-      select: "name image githubUsername",
+      select: "name image githubUsername email",
     })
     .sort({ createdAt: -1 })
     .lean();
@@ -89,6 +101,7 @@ export default async function PostsPage() {
               name?: string;
               image?: string;
               githubUsername?: string;
+              email?: string;
             } | null;
 
             const authorName =
@@ -96,10 +109,17 @@ export default async function PostsPage() {
 
             const authorImage = author?.image || "";
 
+            const isOwner =
+              !!session?.user?.email &&
+              !!author?.email &&
+              session.user.email.toLowerCase() ===
+                author.email.toLowerCase();
+
+            const canManage = isAdmin || isOwner;
+
             return (
-              <Link
+              <article
                 key={post._id.toString()}
-                href={`/posts/${post._id}`}
                 className={`neon-card group reveal reveal-delay-${Math.min(
                   index + 1,
                   4
@@ -111,20 +131,31 @@ export default async function PostsPage() {
                     Community
                   </span>
 
-                  <span className="text-gray-600 transition duration-300 group-hover:translate-x-1 group-hover:text-cyan-400">
+                  <Link
+                    href={`/posts/${post._id}`}
+                    className="text-gray-600 transition duration-300 hover:translate-x-1 hover:text-cyan-400"
+                    aria-label={`View ${post.title}`}
+                  >
                     →
-                  </span>
+                  </Link>
                 </div>
 
                 {/* Title */}
-                <h2 className="mt-6 line-clamp-2 text-xl font-semibold leading-7 text-white transition duration-300 group-hover:text-cyan-300">
-                  {post.title}
-                </h2>
+                <Link href={`/posts/${post._id}`}>
+                  <h2 className="mt-6 line-clamp-2 text-xl font-semibold leading-7 text-white transition duration-300 group-hover:text-cyan-300">
+                    {post.title}
+                  </h2>
+                </Link>
 
                 {/* Content */}
-                <p className="mt-3 line-clamp-4 flex-1 leading-7 text-gray-400">
-                  {post.content}
-                </p>
+                <Link
+                  href={`/posts/${post._id}`}
+                  className="flex-1"
+                >
+                  <p className="mt-3 line-clamp-4 leading-7 text-gray-400">
+                    {post.content}
+                  </p>
+                </Link>
 
                 {/* Footer */}
                 <div className="mt-7 border-t border-white/5 pt-5">
@@ -172,8 +203,13 @@ export default async function PostsPage() {
                       ✦
                     </div>
                   </div>
+
+                  {/* Edit / Delete */}
+                  {canManage && (
+                    <PostActions postId={post._id.toString()} />
+                  )}
                 </div>
-              </Link>
+              </article>
             );
           })}
         </div>
