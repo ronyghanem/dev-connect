@@ -2,13 +2,35 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import NavLinks from "./NavLinks";
 import Image from "next/image";
+import { connectDB } from "@/lib/mongodb";
+import User from "@/models/User";
 
 export default async function Navbar() {
   const session = await auth();
 
-  const userName = session?.user?.name || "Developer";
+  let userName = session?.user?.name || "Developer";
+  let userImage = session?.user?.image || "";
+
+  if (session?.user?.email) {
+    try {
+      await connectDB();
+
+      const user = await User.findOne({
+        email: session.user.email,
+      })
+        .select("name image")
+        .lean();
+
+      if (user) {
+        userName = user.name || userName;
+        userImage = user.image || userImage;
+      }
+    } catch (error) {
+      console.error("Navbar user lookup error:", error);
+    }
+  }
+
   const userInitial = userName.charAt(0).toUpperCase();
-  const userImage = session?.user?.image || "";
 
   const isAdmin =
     session?.user?.email?.toLowerCase() ===

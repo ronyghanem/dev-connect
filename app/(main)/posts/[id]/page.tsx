@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
@@ -63,6 +64,11 @@ export default async function PostPage({ params }: Props) {
   const session = await auth();
   const { isAdmin } = await requireAdmin();
 
+  // Load the post author's profile
+  const author = await User.findById(post.author)
+    .select("name image githubUsername")
+    .lean();
+
   let isOwner = false;
 
   if (session?.user?.email) {
@@ -77,6 +83,14 @@ export default async function PostPage({ params }: Props) {
   }
 
   const canManage = isAdmin || isOwner;
+
+  const authorName =
+    author?.name || post.authorName || "Developer";
+
+  const authorImage = author?.image || "";
+
+  const authorInitial =
+    authorName.charAt(0).toUpperCase() || "D";
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
@@ -121,17 +135,29 @@ export default async function PostPage({ params }: Props) {
 
           {/* Author */}
           <div className="mt-7 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-cyan-400/30 bg-gradient-to-br from-cyan-400/15 to-violet-500/15 font-semibold text-cyan-300">
-              {post.authorName?.charAt(0).toUpperCase() || "D"}
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-cyan-400/30 bg-gradient-to-br from-cyan-400/15 to-violet-500/15 font-semibold text-cyan-300">
+              {authorImage ? (
+                <Image
+                  src={authorImage}
+                  alt={authorName}
+                  fill
+                  sizes="44px"
+                  className="object-cover"
+                />
+              ) : (
+                authorInitial
+              )}
             </div>
 
             <div>
               <p className="text-sm font-medium text-gray-200">
-                {post.authorName}
+                {authorName}
               </p>
 
               <p className="text-xs text-gray-600">
-                Developer community member
+                {author?.githubUsername
+                  ? `@${author.githubUsername}`
+                  : "Developer community member"}
               </p>
             </div>
           </div>
