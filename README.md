@@ -1,792 +1,467 @@
-DevConnect
+# DevConnect
 
-A modern developer community platform built with Next.js 16, MongoDB Atlas, Mongoose, NextAuth, and Tailwind CSS.
+**DevConnect** is a full-stack developer community platform built with **Next.js 16, TypeScript, MongoDB, Mongoose, and Auth.js**.
 
-DevConnect allows developers to create profiles, discover other developers, share technical posts, and manage their own content. The platform also includes an administrator management interface and a complete MongoDB-backed CRUD system for developer records.
+The platform provides a centralized space where developers can create profiles, showcase their technical skills, publish posts, and discover other developers. It also includes an administrative dashboard for managing developer profiles through secure CRUD operations.
 
-The project combines a modern **space/neon/glassmorphism interface** with a real full-stack architecture using Next.js Route Handlers, Server Actions, Mongoose, and MongoDB Atlas.
+## 🌐 Live Application
 
+**Live Demo:** https://devz-connect.vercel.app/
 
+**Repository:** https://github.com/ronyghanem/dev-connect
 
-Features
+---
 
-Developer Community
+## Overview
+
+DevConnect was developed as a full-stack application to demonstrate modern web development practices using the Next.js App Router.
+
+The application combines authentication, database management, REST API development, server-side validation, authorization, and a responsive user interface into a single developer-focused platform.
+
+The project features a futuristic dark interface with glassmorphism elements, neon accents, responsive layouts, and interactive components.
+
+---
+
+## Features
+
+### Developer Profiles
 
 * Browse developer profiles
-* View individual developer profiles
-* GitHub-based developer authentication
-* Automatically save authenticated GitHub users to MongoDB
-* Display developer profile photos
-* Display developer names, bios, skills, GitHub usernames, and profile information
-* Responsive developer directory
+* Display developer roles and biographies
+* Showcase technical skills
+* Display profile images
+* Integrate GitHub developer information
 
+### Authentication
 
+* GitHub OAuth authentication
+* Auth.js session management
+* Protected administrative operations
+* Role-based access through administrator authorization
 
-Community Posts
+### Community Posts
 
-* Browse community posts
-* View individual posts
 * Create posts
+* View published posts
 * Edit posts
 * Delete posts
-* Posts are stored in MongoDB
-* Posts are linked to their author
-* Author information and profile images are displayed
-* Creation dates are displayed
-* Responsive post layout
+* Manage post ownership and permissions
 
+### Developer Management
 
+Administrators can manage developer profiles through a dedicated CRUD interface.
 
-Authentication & Authorization
+Available operations include:
 
-DevConnect uses NextAuth with GitHub authentication.
+* Create developer profiles
+* Edit existing profiles
+* Update name, role, biography, and profile image
+* Delete developer profiles
+* Confirmation before permanent deletion
+* Real-time interface updates after changes
 
-Authenticated users can:
+### Input Validation
 
-* Sign in with GitHub
-* Create community posts
-* Edit their own posts
-* Delete their own posts
-* Manage their own profile
+The application implements client-side and server-side validation.
 
-Administrators can additionally:
+Validation includes:
 
-* Edit any community post
-* Delete any community post
-* Access the developer management dashboard
-* Create developer records
-* Update developer records
-* Delete developer records
+* Required fields
+* Data type validation
+* Whitespace validation
+* Minimum and maximum field lengths
+* MongoDB ObjectId validation
+* Invalid JSON handling
+* Missing resource handling
+* Clear API error responses
 
-Authorization is enforced on both the frontend and backend.
+### Responsive Interface
 
-
-
-Post Permissions
-
-Post permissions follow an owner/admin model:
-
-| Action                     | Admin | Post Owner | Other Developer |
-| -------------------------- | :---: | :--------: | :-------------: |
-| View post                  |   ✅   |      ✅     |        ✅        |
-| Create post                |   ✅   |      ✅     |        ✅        |
-| Edit own post              |   ✅   |      ✅     |        ❌        |
-| Delete own post            |   ✅   |      ✅     |        ❌        |
-| Edit another user's post   |   ✅   |      ❌     |        ❌        |
-| Delete another user's post |   ✅   |      ❌     |        ❌        |
-
-Permissions are checked at multiple levels:
-
-* Post listing UI
-* Post detail page
-* Edit page
-* Server Actions
-* API Route Handlers
-
-This prevents users from bypassing the frontend and directly modifying unauthorized posts.
-
-
-
-MongoDB & Mongoose
-
-The application uses MongoDB Atlas as its persistent database and Mongoose as the ODM.
-
-The project includes a reusable MongoDB connection helper that reads the connection string from an environment variable.
-
-
-Next.js
-   │
-   ├── Server Components
-   ├── Server Actions
-   └── API Route Handlers
-          │
-          ▼
-       Mongoose
-          │
-          ▼
-     MongoDB Atlas
-
-
-Database Models
-
-User
-
-The `User` model stores authenticated developer information.
-
-Main fields include:
-
-* `name`
-* `email`
-* `image`
-* `bio`
-* `skills`
-* `githubUsername`
-* `githubId`
-* `createdAt`
-* `updatedAt`
-
-
-
-Post
-
-The `Post` model stores community posts.
-
-Main fields include:
-
-* `title`
-* `content`
-* `author`
-* `authorName`
-* `createdAt`
-* `updatedAt`
-
-The `author` field references the MongoDB `User` document.
-
-
-
-Developer
-
-The assignment-specific `Developer` model provides a dedicated MongoDB-backed CRUD resource.
-
-Main fields include:
-
-* `name`
-* `role`
-* `bio`
-* `image`
-* `createdAt`
-* `updatedAt`
-
-The schema uses validation, trimming, timestamps, and Mongoose model caching to work correctly with Next.js development reloads.
-
-
-
-Developer CRUD
-
-DevConnect includes a complete CRUD implementation for developer records.
-
-PI Endpoints
-
-Get Developers
-
-GET /api/developers
-
-Returns all developer records from MongoDB.
-
-
-
-Create Developer
-
-POST /api/developers
-
-Creates a new developer record.
-
-Required fields:
-
-
-{
-  "name": "John Doe",
-  "role": "Full Stack Developer",
-  "bio": "Developer interested in modern web technologies."
-}
-
-
-Optional field:
-
-{
-  "image": "https://example.com/profile.jpg"
-}
-
-
-
-Update Developer
-
-PUT /api/developers/[id]
-
-Updates an existing developer.
-
-
-
-Delete Developer
-
-
-DELETE /api/developers/[id]
-
-Deletes an existing developer.
-
-
-API Status Codes
-
-The API handles appropriate responses including:
-
-* `200` — Successful request
-* `201` — Resource created
-* `400` — Invalid request/data
-* `401` — Authentication required
-* `403` — Forbidden
-* `404` — Resource not found
-* `500` — Server/database error
-
-Responses are returned as clean JSON objects.
-
-
-
-Developer Management Dashboard
-
-Administrators can access:
-
-
-/developers-crud
-
-
-The management interface provides:
-
-* Developer listing
-* Add developer form
-* Edit developer functionality
-* Delete developer functionality
-* Image URL support
-* Loading states
-* Error states
-* Empty states
-* Delete confirmation
-* Responsive UI
-* MongoDB-backed persistence
-
-The page demonstrates the complete end-to-end CRUD flow:
-
-Form
-  ↓
-Next.js API Route
-  ↓
-Mongoose
-  ↓
-MongoDB Atlas
-  ↓
-Updated UI
-
-
-Developer Profiles
-
-The main developer directory is available at:
-
-
-/developers
-
-
-Developers can be viewed through their individual profile pages:
-
-/developers/[id]
-
-
-The community developer directory is based on authenticated `User` records, while the assignment CRUD system uses the dedicated `Developer` model.
-
-This keeps the existing GitHub developer community functionality separate from the assignment's dedicated CRUD implementation.
-
-
-Posts Architecture
-
-Posts are available at:
-
-
-/posts
-
-
-Individual posts:
-
-
-/posts/[id]
-
-
-Create a post:
-
-
-/posts/new
-
-
-Edit a post:
-
-
-/posts/[id]/edit
-
-
-Posts use both:
-
-* Next.js Server Components
-* Next.js Server Actions
-* API Route Handlers
-* MongoDB/Mongoose
-
-This provides both server-side and API-based operations.
-
-
-Admin System
-
-Administrator access is controlled through an environment variable rather than hard-coding an email address in the source code.
-
-
-ADMIN_EMAIL=your-admin-email
-
-
-The application compares the authenticated user's email with the configured administrator email.
-
-Admin authorization is centralized through:
-
-lib/isAdmin.ts
-
-
-The admin system is used for:
-
-* Developer management access
-* Developer CRUD operations
-* Managing any community post
-
-Unauthorized users are redirected or receive a `403 Forbidden` response depending on the operation.
-
-
- UI & Design
-
-DevConnect uses a custom futuristic developer-community design.
-
-Visual style
-
-* Space-inspired background
-* Neon cyan and violet accents
-* Glassmorphism cards
-* Frosted glass effects
-* Backdrop blur
-* Gradient effects
-* Neon borders
-* Soft glowing shadows
-* Animated reveal effects
-* Responsive layouts
-* Dark futuristic aesthetic
-
-The design was built to make the application feel like a modern developer platform rather than a basic CRUD demonstration.
-
-Responsive Design
-
-The interface is designed for:
+The interface is designed to work across:
 
 * Desktop
-* Laptop
 * Tablet
 * Mobile
 
-The navigation includes responsive desktop and mobile behavior.
+The UI uses a futuristic visual system based on dark backgrounds, glass-style cards, neon accents, animations, and responsive layouts.
 
+---
 
-Navigation
+## Technology Stack
 
-The application includes:
+| Technology   | Usage                            |
+| ------------ | -------------------------------- |
+| Next.js 16   | Full-stack application framework |
+| React 19     | UI development                   |
+| TypeScript   | Type-safe development            |
+| Tailwind CSS | Styling and responsive design    |
+| MongoDB      | Database                         |
+| Mongoose     | Database modeling and queries    |
+| Auth.js      | Authentication                   |
+| GitHub OAuth | Authentication provider          |
+| Vercel       | Deployment                       |
 
-* Home
-* Developers
-* Manage Developers *(admin only)*
-* Posts
-* My Profile
-* Authentication controls
+---
 
-The Manage Developers navigation item is only displayed to administrators.
+## Architecture
 
+DevConnect follows a full-stack Next.js architecture.
 
-Authentication
+```text
+┌───────────────────────────────────────────┐
+│                  Client UI                │
+│       React + Next.js + Tailwind CSS      │
+└─────────────────────┬─────────────────────┘
+                      │
+                      ▼
+┌───────────────────────────────────────────┐
+│              Next.js App Router           │
+│        Server & Client Components         │
+└─────────────────────┬─────────────────────┘
+                      │
+                      ▼
+┌───────────────────────────────────────────┐
+│                REST API                   │
+│       Developers / Posts / Auth           │
+└─────────────────────┬─────────────────────┘
+                      │
+                      ▼
+┌───────────────────────────────────────────┐
+│             Mongoose / MongoDB            │
+│        Users / Developers / Posts         │
+└───────────────────────────────────────────┘
+```
 
-Authentication is implemented with NextAuth and GitHub.
+---
 
-When a developer signs in with GitHub:
+## Project Structure
 
-1. NextAuth authenticates the user.
-2. GitHub account information is received.
-3. The application connects to MongoDB.
-4. The user's profile is created or updated.
-5. The user becomes available in the developer community.
-
-GitHub information can include:
-
-* Name
-* Email
-* Profile image
-* GitHub username
-* GitHub account ID
-
-
-Project Structure
-
-
+```text
 dev-connect/
 │
 ├── app/
-│   ├── api/
-│   │   ├── developers/
-│   │   │   ├── route.ts
-│   │   │   └── [id]/
-│   │   │       └── route.ts
-│   │   │
-│   │   └── posts/
-│   │       ├── route.ts
-│   │       └── [id]/
-│   │           └── route.ts
-│   │
 │   ├── (main)/
 │   │   ├── developers/
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/
-│   │   │       └── page.tsx
-│   │   │
 │   │   ├── developers-crud/
-│   │   │   ├── page.tsx
-│   │   │   └── DevelopersClient.tsx
-│   │   │
 │   │   ├── posts/
-│   │   │   ├── page.tsx
-│   │   │   ├── PostActions.tsx
-│   │   │   ├── new/
-│   │   │   └── [id]/
-│   │   │       └── edit/
-│   │   │
+│   │   └── ...
+│   │
+│   ├── api/
+│   │   ├── developers/
+│   │   ├── posts/
 │   │   └── ...
 │   │
 │   └── ...
 │
 ├── components/
-│   ├── Navbar.tsx
-│   ├── NavLinks.tsx
+│   ├── Navbar
+│   ├── UI components
 │   └── ...
 │
 ├── lib/
 │   ├── mongodb.ts
-│   ├── isAdmin.ts
-│   ├── saveUser.ts
-│   └── actions/
-│       └── posts.ts
+│   └── isAdmin.ts
 │
 ├── models/
 │   ├── User.ts
-│   ├── Post.ts
-│   └── Developer.ts
+│   ├── Developer.ts
+│   └── Post.ts
 │
 ├── public/
 │
 ├── auth.ts
-├── next.config.ts
 ├── package.json
 ├── tsconfig.json
-├── eslint.config.mjs
-├── postcss.config.mjs
 └── README.md
+```
 
+---
 
-Technologies
+## API
 
-Frontend
+### Developer API
 
-* Next.js 16
-* React 19
-* TypeScript
-* Tailwind CSS
+#### Retrieve developers
 
-Backend
+```http
+GET /api/developers
+```
 
-* Next.js Route Handlers
-* Next.js Server Actions
-* Node.js
-* Mongoose
+Returns the available developer profiles.
 
-Database
+#### Create a developer
 
-* MongoDB Atlas
+```http
+POST /api/developers
+```
 
-Authentication
+Creates a new developer profile.
 
-* NextAuth
-* GitHub OAuth
+#### Update a developer
 
-Development
+```http
+PUT /api/developers/:id
+```
 
-* ESLint
-* npm
-* Git
-* GitHub
+Updates an existing developer profile.
 
+#### Delete a developer
 
+```http
+DELETE /api/developers/:id
+```
 
-Installation
+Permanently removes a developer profile.
 
-1. Clone the repository
+Administrative endpoints are protected by authentication and administrator authorization.
 
+---
 
-git clone https://github.com/ronyghanem/dev-connect.git
+## Validation
 
+Developer data is validated before being stored in the database.
 
-Enter the project directory:
+### Name
 
+* Required
+* String
+* Minimum 2 characters
+* Maximum 100 characters
+* Whitespace-only values rejected
 
-cd dev-connect
+### Role
 
+* Required
+* String
+* Maximum 100 characters
+* Whitespace-only values rejected
 
-2. Install dependencies
+### Biography
 
+* Required
+* String
+* Maximum 1000 characters
+* Whitespace-only values rejected
 
-npm install
+### Profile Image
 
+* Optional
+* String
+* Maximum 500 characters
 
-3. Configure environment variables
+### MongoDB IDs
 
-Create a file named:
+MongoDB ObjectIds are validated before update and delete operations.
 
+Invalid requests return appropriate HTTP status codes and descriptive error messages.
 
-.env.local
+---
 
+## Authentication & Authorization
 
-Add the required environment variables:
+GitHub OAuth is implemented through Auth.js.
 
+Authenticated users can access protected functionality according to their permissions.
 
-MONGODB_URI=your_mongodb_atlas_connection_string
+Administrative operations are restricted through an administrator email configured through an environment variable.
 
-ADMIN_EMAIL=your_admin_email
+```text
+ADMIN_EMAIL
+```
 
-GITHUB_ID=your_github_oauth_client_id
-GITHUB_SECRET=your_github_oauth_client_secret
+This protects developer creation, editing, and deletion operations from unauthorized users.
+
+---
+
+## Developer Management Interface
+
+The administrative developer management interface provides a dedicated editing workflow.
+
+Administrators can select a developer and modify:
+
+* Name
+* Role
+* Biography
+* Profile image
+
+The interface provides:
+
+* Form validation
+* Character limits
+* Loading states
+* Success messages
+* Error messages
+* Edit mode indicators
+* Cancel functionality
+* Delete confirmation modal
+* Responsive layout
+
+The application uses relative API routes rather than hardcoded development URLs, allowing the same API structure to work in both local development and production deployments.
+
+---
+
+## Environment Variables
+
+The application requires the following environment variables:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
 
 AUTH_SECRET=your_auth_secret
 
+GITHUB_ID=your_github_client_id
 
+GITHUB_SECRET=your_github_client_secret
 
-MongoDB Atlas Setup
+ADMIN_EMAIL=your_admin_email
+```
 
-1. Create a MongoDB Atlas account.
-2. Create a cluster.
-3. Create a database user.
-4. Configure the network access settings.
-5. Copy the MongoDB connection string.
-6. Add it to `.env.local` as:
+Environment variables are intentionally excluded from version control.
 
+---
 
-MONGODB_URI=your_connection_string
+## Local Development
 
+### Installation
 
-The application uses Mongoose to connect to the Atlas cluster.
+```bash
+git clone https://github.com/ronyghanem/dev-connect.git
+```
 
-The required collections are created automatically when documents are stored.
+```bash
+cd dev-connect
+```
 
+```bash
+npm install
+```
 
+### Environment Configuration
 
-Running the Project
+Create a `.env.local` file in the project root and configure the required environment variables.
 
-Start the development server:
+### Start Development Server
 
+```bash
 npm run dev
+```
 
+The application will be available at:
 
-Open:
-
+```text
 http://localhost:3000
+```
 
+---
 
-The application will be available locally.
+## Production Build
 
+The project can be verified using the production build process:
 
-
-Testing
-
-The project can be tested through the following flows.
-
-Developer CRUD
-
-1. Sign in as administrator.
-2. Open `/developers-crud`.
-3. Create a developer.
-4. Refresh the page.
-5. Confirm the developer remains.
-6. Edit the developer.
-7. Refresh again.
-8. Confirm the changes remain.
-9. Delete the developer.
-10. Confirm the developer is removed.
-
-This verifies that the application is using persistent MongoDB storage rather than temporary in-memory state.
-
-Post Permissions
-
-Developer A
-
-* Create a post.
-* Edit their own post.
-* Delete their own post.
-* Attempt to edit another developer's post.
-
-The last operation should be rejected.
-
-Developer B
-
-The same ownership restrictions apply.
-
-Administrator
-
-The administrator should be able to:
-
-* Edit any post.
-* Delete any post.
-* Access Developer Management.
-
-Logged-out user
-
-A logged-out visitor can browse public content but cannot create, edit, or delete protected resources.
-
-
-
-Security Considerations
-
-The application avoids relying solely on frontend visibility for authorization.
-
-For example, hiding an Edit button does not provide security by itself.
-
-Authorization is also checked server-side through:
-
-* Next.js Server Actions
-* API Route Handlers
-* Session validation
-* MongoDB user lookup
-* Post ownership checks
-* Administrator checks
-
-Therefore, manually requesting a protected endpoint does not bypass the permission system.
-
-
-
-Build
-
-Before deployment or submission, run:
-
-
+```bash
 npm run build
+```
 
+The production server can then be started with:
 
-A successful production build confirms that the application compiles correctly for production.
+```bash
+npm start
+```
 
+---
 
-Deployment
+## Deployment
 
-The application can be deployed to a Next.js-compatible hosting platform such as Vercel.
+DevConnect is deployed on **Vercel**.
 
-When deploying, configure the same environment variables in the hosting provider:
+Production application:
 
+**https://devz-connect.vercel.app/**
 
-MONGODB_URI=...
-ADMIN_EMAIL=...
-GITHUB_ID=...
-GITHUB_SECRET=...
-AUTH_SECRET=...
+The production deployment uses the same application architecture and API routes as the local development environment.
 
+Required environment variables are configured through the deployment environment rather than being stored in the repository.
 
-Do not upload `.env.local` or expose credentials in the repository.
+---
 
+## Screenshots
 
+### Home
 
-Assignment Requirements
+![DevConnect Home](./public/screenshots/home.png)
 
-This project fulfills the MongoDB CRUD assignment requirements:
+### Developers
 
-MongoDB Atlas
+![Developer Profiles](./public/screenshots/developers.png)
 
-The application was upgraded from local/in-memory data to persistent MongoDB Atlas storage.
+### Developer Management
 
-Mongoose
+![Developer Management](./public/screenshots/developers-crud.png)
 
-Mongoose is used to connect the Next.js application to MongoDB and define database schemas.
+### Community Posts
 
-Developer Model
+![Community Posts](./public/screenshots/posts.png)
 
-A dedicated `Developer` model was created with fields including:
+### my profile
 
+![my profile](./public/screenshots/profile.png)
 
-name
-role
-bio
-image
-createdAt
-updatedAt
+---
 
+## Key Development Concepts
 
+DevConnect demonstrates practical implementation of:
 
-API CRUD
-
-The following endpoints were implemented:
-
-
-GET     /api/developers
-POST    /api/developers
-PUT     /api/developers/[id]
-DELETE  /api/developers/[id]
-
-
-Frontend CRUD
-
-The Developer Management page provides:
-
-* Database records
-* Create form
-* Edit functionality
-* Delete functionality
-* Loading states
-* Error states
-* Empty states
-
-
-End-to-End Flow
-
-The final architecture demonstrates:
-
-
-Next.js Frontend
-       ↓
-Route Handlers
-       ↓
-Mongoose
-       ↓
-MongoDB Atlas
-       ↓
-Persistent Database
-
-
-
-
-Project Goals
-
-DevConnect was built to demonstrate practical full-stack development skills, including:
-
-* Modern React development
 * Next.js App Router
-* Server Components
-* Client Components
-* Server Actions
-* REST-style API Route Handlers
+* React Server Components
+* React Client Components
+* TypeScript
+* REST API development
+* CRUD operations
+* MongoDB integration
+* Mongoose schemas and queries
 * Authentication
 * Authorization
-* MongoDB database design
-* Mongoose schemas
-* CRUD operations
-* Database relationships
+* GitHub OAuth
+* Server-side validation
+* Client-side validation
+* Protected API routes
 * Responsive UI development
 * Error handling
-* Loading states
-* Git/GitHub workflow
-* Production build validation
+* Production deployment
 
+---
 
-Author
+## Project Objectives
 
-Rony Ghanem
+The project was developed to provide practical experience building a complete full-stack application from frontend interface to backend API and database integration.
 
-Management Information Systems student and developer focused on web development, data, AI integration, and modern full-stack applications.
+The main objectives were to:
 
-Links
+* Build a modern full-stack application with Next.js
+* Implement database-backed CRUD functionality
+* Integrate authentication and authorization
+* Develop protected API routes
+* Implement robust input validation
+* Create a responsive and polished user interface
+* Deploy the application to a production environment
 
-* Portfolio: https://ronygh.netlify.app
-* GitHub: https://github.com/ronyghanem
-* LinkedIn: https://www.linkedin.com/in/rony-ghanem
+---
 
-License
+## Author
 
-This project was created for educational, portfolio, and development purposes.
+### Rony Ghanem
+
+Management Information Systems graduate focused on web development, AI technologies, backend development, and modern software engineering.
+
+**GitHub:** https://github.com/ronyghanem
+
+**LinkedIn:** https://linkedin.com/in/rony-ghanem
+
+**Portfolio:** https://ronygh.netlify.app/
+
+---
+
+## License
+
+This project was developed as a learning and portfolio project.
